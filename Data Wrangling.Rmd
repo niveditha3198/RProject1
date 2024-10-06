@@ -1,0 +1,98 @@
+---
+title: "Data Wrangling"
+author: "Niveditha Nanda Gopal"
+date: "2024-09-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data Wrangling
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+```
+## 1. Select columns
+```{r}
+head(penguins)
+penguinsV2<-select(penguins, species, bill_length_mm, body_mass_g, flipper_length_mm)
+penguinsV2
+
+```
+## 2. PIP Operator
+```{r}
+penguinsV2 %>%
+  filter(species=='Gentoo') %>%
+  select(species, bill_length_mm, body_mass_g)
+```
+
+## 3. create a new column (mutate)
+```{r}
+penguinsV2 %>%
+  mutate(flipper_bill_ratio=flipper_length_mm/bill_length_mm)
+```
+### 4. rename a column (rename)
+
+```{r}
+penguinsV2 %>% rename(f_l_m = flipper_length_mm)
+penguinsV2 %>% arrange(bill_length_mm)
+penguinsV2
+```
+## summarize
+```{r}
+penguinsV2 %>% summarize(num_rows=n(),avg_mass_kg=mean(body_mass_g/1000,na.rm = TRUE),avg_flipper_bill= mean(flipper_length_mm/bill_length_mm, na.rm = TRUE))
+
+```
+Use across to perform column-wise operations (for all columns), which out copying and pasting the same code (e.g., sum(is.na(species)), ...)
+
+```{r}
+Num_NAs <- penguinsV2 %>% summarize(species=sum(is.na(species)), bill_length_mm=sum(is.na(bill_length_mm)), body_mass_g=sum(is.na(body_mass_g)), flipper_length_mm=sum(is.na(flipper_length_mm)))
+print(Num_NAs)
+
+num_nas <- penguinsV2 %>% summarize(across(everything(),~sum(is.na(.x))))
+num_nas
+
+```
+```{r}
+mean_val<- penguinsV2 %>% summarize(across(where(is.numeric),~mean(.x,na.rm = TRUE)))
+mean_val
+```
+With the operations, it is then possible to do a sequence of data-wrangling tasks, by combining the functions. 
+An example of combining the summarize, groupby and across functions:
+```{r}
+penguinsV2 %>% select(species)
+
+```
+```{r}
+penguinsV2 %>% select(-bill_length_mm) %>% group_by(species) %>% summarize(across(where(is.numeric),~mean(.x,na.rm=TRUE)))
+```
+```{r}
+penguins_bill_length_df <- penguinsV2 %>% arrange(desc(bill_length_mm))%>% select(species, bill_length_mm)
+penguins_bill_length_df
+```
+```{r}
+species<-unique(penguinsV2$species)
+indian_names<- c("Niveditha","Prakash","Hari")
+indian_df<-data.frame(species,indian_names)
+indian_df
+
+```
+```{r}
+penguins_bill_length_df %>% inner_join(indian_df)
+```
+```{r}
+print(band_members)
+print(band_instruments)
+x=band_members
+y=band_instruments
+#x%>% left_join(y)
+#x%>% right_join(y)
+x%>%full_join(y)
+```
+
